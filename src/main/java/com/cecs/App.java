@@ -7,19 +7,16 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 public class App {
     private static final int port = 5500;
-    private static final byte[] buffer = new byte[4096];
+    private static final byte[] buffer = new byte[16384];
     static HashMap<String, Object> listOfObjects = new HashMap<>();
 
     public static void main(String[] args) {
+        registerObject(new SongServices(), "SongServices");
         try {
             openConnection();
         } catch (IOException e) {
@@ -27,7 +24,7 @@ public class App {
         }
     }
 
-    private static void openConnection() throws IOException {
+    public static void openConnection() throws IOException {
         var socket = new DatagramSocket(port);
         while (true) {
             // Receive
@@ -41,14 +38,13 @@ public class App {
                 System.out.println("Server is closing...");
                 break;
             }
-            dispatch(message);
+            final var out = dispatch(message).getBytes();
 
             // Get client info
             final var address = inbound.getAddress();
             final var port = inbound.getPort();
 
             // Send back to client
-            final var out = "Hello from server!".getBytes();
             final var outboundPacket = new DatagramPacket(out, out.length, address, port);
             System.out.format("Sending message of size %s to %s\n", out.length, address);
             socket.send(outboundPacket);
@@ -63,7 +59,7 @@ public class App {
      * @param request The JSON object represented as a string
      *
      * @return String representing either the return value of the function, or an
-     *         error if one occured
+     *         error if one occurred
      */
     private static String dispatch(String request) {
         JsonObject jsonReturn = new JsonObject();
@@ -75,9 +71,7 @@ public class App {
             Object object = listOfObjects.get(jsonRequest.get("objectName").getAsString());
 
             // Obtains the method from the list of methods that exist for the class
-            var optionalMethod = Arrays.stream(object.getClass().getMethods()).filter(it -> {
-                return it.getName().equals(jsonRequest.get("remoteMethod").getAsString());
-            }).findFirst();
+            var optionalMethod = Arrays.stream(object.getClass().getMethods()).filter(it -> it.getName().equals(jsonRequest.get("remoteMethod").getAsString())).findFirst();
             if (optionalMethod.isEmpty()) {
                 jsonReturn.addProperty("error", "Method does not exist");
                 return jsonReturn.toString();
@@ -99,30 +93,18 @@ public class App {
                     case "java.lang.Integer":
                         parameters[i] = Integer.parseInt(parameterStrs[i]);
                         break;
-                    case "String":
-                        parameters[i] = new String(parameterStrs[i]);
+                    case "java.lang.String":
+                        parameters[i] = parameterStrs[i];
                         break;
                     }
                 }
             }
 
-            // Prepare the return
-            // Class returnType = method.getReturnType();
-            // String ret = "";
-            // switch (returnType.getCanonicalName()) {
-            // case "java.lang.Long":
-            // case "java.lang.Integer":
-            // ret = method.invoke(object, parameters).toString();
-            // break;
-            // case "java.lang.String":
-            // ret = (String) method.invoke(object, parameters).toString();
-            // break;
-            // }
             var ret = method.invoke(object, parameters).toString();
             jsonReturn.addProperty("ret", ret);
 
         } catch (InvocationTargetException | IllegalAccessException e) {
-            var errorField = String.format("Error on %s.%s", jsonRequest.get("objectName").getAsString(),
+            var errorField = String.format("Error on %s.%s()", jsonRequest.get("objectName").getAsString(),
                     jsonRequest.get("remoteMethod").getAsString());
             jsonReturn.addProperty("error", errorField);
         }
@@ -135,7 +117,7 @@ public class App {
      * 
      * @param remoteMethod: It is the name of the method that objectName implements.
      * 
-     * @objectName: It is the main class that contaions the remote methods each
+     * @objectName: It is the main class that contains the remote methods each
      * object can contain several remote methods
      */
     public static void registerObject(Object remoteMethod, String objectName) {

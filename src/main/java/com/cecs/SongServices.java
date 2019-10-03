@@ -8,6 +8,8 @@ import java.util.Base64;
 public class SongServices {
     static final int FRAGMENT_SIZE = 8192;
 
+    SongServices() {}
+
     /*
      * getSongChunk: Gets a chunk of a given song
      *

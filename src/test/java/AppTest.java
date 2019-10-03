@@ -3,6 +3,8 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
+import static com.cecs.App.openConnection;
+
 class AppTest {
     @Test
     void loadSong() throws IOException {
