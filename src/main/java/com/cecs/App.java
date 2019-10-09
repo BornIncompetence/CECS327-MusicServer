@@ -2,11 +2,12 @@ package com.cecs;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.util.Arrays;
 import java.util.HashMap;
+
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -17,6 +18,7 @@ public class App {
 
     public static void main(String[] args) {
         registerObject(new SongServices(), "SongServices");
+        registerObject(new UserServices(), "UserServices");
         try {
             openConnection();
         } catch (IOException e) {
@@ -65,6 +67,7 @@ public class App {
         JsonObject jsonReturn = new JsonObject();
         JsonParser parser = new JsonParser();
         JsonObject jsonRequest = parser.parse(request).getAsJsonObject();
+        var gson = new GsonBuilder().setPrettyPrinting().create();
 
         try {
             // Obtains the object pointing to SongServices
@@ -100,8 +103,8 @@ public class App {
                 }
             }
 
-            var ret = method.invoke(object, parameters).toString();
-            jsonReturn.addProperty("ret", ret);
+            var ret = method.invoke(object, parameters);
+            jsonReturn.addProperty("ret", gson.toJson(ret));
 
         } catch (InvocationTargetException | IllegalAccessException e) {
             var errorField = String.format("Error on %s.%s()", jsonRequest.get("objectName").getAsString(),
