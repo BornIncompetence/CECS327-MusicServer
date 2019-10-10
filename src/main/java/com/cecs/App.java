@@ -14,7 +14,7 @@ import com.google.gson.JsonParser;
 public class App {
     private static final int port = 5500;
     private static final byte[] buffer = new byte[16384];
-    static HashMap<String, Object> listOfObjects = new HashMap<>();
+    private static HashMap<String, Object> listOfObjects = new HashMap<>();
 
     public static void main(String[] args) {
         registerObject(new SongServices(), "SongServices");

@@ -24,15 +24,14 @@ public class UserServices {
      * @return ArrayList of user from the server if the user is found, or null if the user is not found
      * @throws IOException If file could not be found or modified
      */
-    public static ArrayList<Playlist> login(String username, String password) throws IOException {
+    public static User login(String username, String password) throws IOException {
         var loginUser = new User(username, password);
         var gson = new GsonBuilder().setPrettyPrinting().create();
         var users = loadUsers(gson);
 
-        var opt = Arrays.stream(users).filter(
+        return Arrays.stream(users).filter(
                 it -> it.username.equalsIgnoreCase(loginUser.username) && it.password.equals(loginUser.password))
-                .findFirst();
-        return opt.map(user -> user.userPlaylists).orElse(null);
+                .findFirst().orElse(null);
     }
 
     /**
