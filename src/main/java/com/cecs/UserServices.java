@@ -14,6 +14,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 
+import static java.util.Arrays.binarySearch;
+
 public class UserServices {
     private static Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
@@ -24,20 +26,20 @@ public class UserServices {
      * Loads the user playlist from server, will return null if the authentication
      * fails
      * 
-     * @param newUser The user whose playlist is being updated
+     * @param user The user whose playlist is being updated
      * @return <code>true</code> if update is successful and <code>false</code>
      *         otherwise
      * @throws IOException If file could not be found or modified
      */
-    public static boolean updateUser(User newUser) throws IOException {
+    public static boolean updateUser(User user) throws IOException {
         var users = loadUsers();
 
         if (users == null) {
             return false;
         } else {
-            for (var user : users) {
-                if (newUser.username.equalsIgnoreCase(user.username)) {
-                    user.setUserPlaylists(newUser.userPlaylists);
+            for (var u : users) {
+                if (user.username.equalsIgnoreCase(u.username)) {
+                    u.setUserPlaylists(user.userPlaylists);
                     break;
                 }
             }
@@ -50,19 +52,39 @@ public class UserServices {
         return true;
     }
 
+    public static boolean deleteAccount(User user) throws IOException {
+        var users = loadUsers();
+        var newUsers = new User[users.length - 1];
+
+        // Copy all Users to new array except for deleted User
+        int deleteIdx = binarySearch(users, user);
+        if (deleteIdx < 0) {
+            return false;
+        }
+        System.arraycopy(users, 0, newUsers, 0, deleteIdx);
+        System.arraycopy(users, deleteIdx + 1, newUsers, deleteIdx, newUsers.length - deleteIdx);
+
+        // Create string from array of Users and write to file
+        var jsonUsers = gson.toJson(newUsers);
+        var writer = new FileWriter("users.json");
+        writer.write(jsonUsers);
+        writer.close();
+        return true;
+    }
+
     /**
      * Function to create a new User and add the User to a JSON file
      *
-     * @param name Name of user
-     * @param pass Password of user
+     * @param username Name of user
+     * @param password Password of user
      *
      * @return <code>true</code> If new user is added to file, <code>false</code> if
      *         the username already exists
      *
      * @throws IOException If file could not be modified or created
      */
-    public static boolean createAccount(String name, String pass) throws IOException {
-        var newUser = new User(name, pass);
+    public static boolean createAccount(String username, String password) throws IOException {
+        var newUser = new User(username, password);
         var users = loadUsers();
 
         User[] newUsers;
