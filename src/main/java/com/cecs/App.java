@@ -7,6 +7,7 @@ import java.net.DatagramSocket;
 import java.util.Arrays;
 import java.util.HashMap;
 
+import com.cecs.model.User;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -74,7 +75,8 @@ public class App {
             Object object = listOfObjects.get(jsonRequest.get("objectName").getAsString());
 
             // Obtains the method from the list of methods that exist for the class
-            var optionalMethod = Arrays.stream(object.getClass().getMethods()).filter(it -> it.getName().equals(jsonRequest.get("remoteMethod").getAsString())).findFirst();
+            var optionalMethod = Arrays.stream(object.getClass().getMethods())
+                    .filter(it -> it.getName().equals(jsonRequest.get("remoteMethod").getAsString())).findFirst();
             if (optionalMethod.isEmpty()) {
                 jsonReturn.addProperty("error", "Method does not exist");
                 return jsonReturn.toString();
@@ -98,6 +100,9 @@ public class App {
                         break;
                     case "java.lang.String":
                         parameters[i] = parameterStrs[i];
+                        break;
+                    case "com.cecs.model.User":
+                        parameters[i] = gson.fromJson(parameterStrs[i], User.class);
                         break;
                     }
                 }
