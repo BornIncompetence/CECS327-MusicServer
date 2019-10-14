@@ -11,12 +11,12 @@ public class MusicServices {
 
     }
 
-    public static ObservableList<Music> loadDatabase() {
+    public static Music[] loadSongs(String asdf) {
         var reader = new InputStreamReader(App.class.getResourceAsStream("/music.json"), StandardCharsets.UTF_8);
         var musics = new GsonBuilder().create().fromJson(reader, Music[].class);
         for (Music music : musics) {
             music.getSong().setArtist(music.getArtist().getName());
         }
-        return FXCollections.observableArrayList(musics);
+        return musics;
     }
 }
