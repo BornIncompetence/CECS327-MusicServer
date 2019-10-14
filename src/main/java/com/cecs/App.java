@@ -22,6 +22,7 @@ public class App {
     public static void main(String[] args) {
         registerObject(new SongServices(), "SongServices");
         registerObject(new UserServices(), "UserServices");
+        registerObject(new MusicServices(), "MusicServices");
         try {
             openConnection();
         } catch (IOException e) {
@@ -94,9 +95,11 @@ public class App {
                     parameterStrs[i] = it.next().getValue().getAsString();
                     switch (types[i].getCanonicalName()) {
                     case "java.lang.Long":
+                    case "long":
                         parameters[i] = Long.parseLong(parameterStrs[i]);
                         break;
                     case "java.lang.Integer":
+                    case "int":
                         parameters[i] = Integer.parseInt(parameterStrs[i]);
                         break;
                     case "java.lang.String":
@@ -113,6 +116,7 @@ public class App {
             jsonReturn.addProperty("ret", gson.toJson(ret));
 
         } catch (InvocationTargetException | IllegalAccessException e) {
+            e.printStackTrace();
             var errorField = String.format("Error on %s.%s()", jsonRequest.get("objectName").getAsString(),
                     jsonRequest.get("remoteMethod").getAsString());
             jsonReturn.addProperty("error", errorField);
