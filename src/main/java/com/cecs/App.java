@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 import com.cecs.model.User;
+import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -16,6 +17,7 @@ public class App {
     private static final int port = 5500;
     private static final byte[] buffer = new byte[16384];
     private static HashMap<String, Object> listOfObjects = new HashMap<>();
+    private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
     public static void main(String[] args) {
         registerObject(new SongServices(), "SongServices");
@@ -27,7 +29,7 @@ public class App {
         }
     }
 
-    public static void openConnection() throws IOException {
+    private static void openConnection() throws IOException {
         var socket = new DatagramSocket(port);
         while (true) {
             // Receive
@@ -68,7 +70,6 @@ public class App {
         JsonObject jsonReturn = new JsonObject();
         JsonParser parser = new JsonParser();
         JsonObject jsonRequest = parser.parse(request).getAsJsonObject();
-        var gson = new GsonBuilder().setPrettyPrinting().create();
 
         try {
             // Obtains the object pointing to SongServices
@@ -128,7 +129,7 @@ public class App {
      * @objectName: It is the main class that contains the remote methods each
      * object can contain several remote methods
      */
-    public static void registerObject(Object remoteMethod, String objectName) {
+    private static void registerObject(Object remoteMethod, String objectName) {
         listOfObjects.put(objectName, remoteMethod);
     }
 }
