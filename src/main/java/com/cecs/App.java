@@ -11,6 +11,8 @@ import java.util.Map;
 
 import com.cecs.model.RemoteRef;
 import com.cecs.model.ReplyMessage;
+import com.cecs.model.User;
+import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -20,10 +22,13 @@ public class App {
     private static final byte[] buffer = new byte[16384];
     private static HashMap<String, Object> listOfObjects = new HashMap<>();
     private static Map<InetAddress, ReplyMessage> history; // store last message from each client to avoid duplicate
+    private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
     public static void main(String[] args) {
         registerObject(new SongServices(), "SongServices");
         registerObject(new UserServices(), "UserServices");
         history =  new HashMap<>();
+    
+        registerObject(new MusicServices(), "MusicServices");
         try {
             remoteRef = new RemoteRef();
             openConnection();
@@ -72,7 +77,7 @@ public class App {
         JsonObject jsonReturn = new JsonObject();
         JsonParser parser = new JsonParser();
         JsonObject jsonRequest = parser.parse(request).getAsJsonObject();
-        var gson = new GsonBuilder().setPrettyPrinting().create();
+        //var gson = new GsonBuilder().setPrettyPrinting().create();
         int requestId = 0;
         try {
             // Obtains the object pointing to SongServices
@@ -89,7 +94,8 @@ public class App {
             //else if(semantic == "AT_LEAST_ONCE" or message is not found in history) {
 
             // Obtains the method from the list of methods that exist for the class
-            var optionalMethod = Arrays.stream(object.getClass().getMethods()).filter(it -> it.getName().equals(jsonRequest.get("remoteMethod").getAsString())).findFirst();
+            var optionalMethod = Arrays.stream(object.getClass().getMethods())
+                    .filter(it -> it.getName().equals(jsonRequest.get("remoteMethod").getAsString())).findFirst();
             if (optionalMethod.isEmpty()) {
                 jsonReturn.addProperty("error", "Method does not exist");
                 return jsonReturn.toString();
@@ -111,8 +117,17 @@ public class App {
                     case "java.lang.Integer":
                         parameters[i] = Integer.parseInt(parameterStrs);
                         break;
+                    case "long":
+                        parameters[i] = Long.parseLong(parameterStrs[i]);
+                        break;
+                    case "int":
+                        parameters[i] = Integer.parseInt(parameterStrs[i]);
+                        break;
                     case "java.lang.String":
                         parameters[i] = parameterStrs;
+                        break;
+                    case "com.cecs.model.User":
+                        parameters[i] = gson.fromJson(parameterStrs[i], User.class);
                         break;
                     }
                 }
@@ -122,6 +137,7 @@ public class App {
             jsonReturn.addProperty("ret", gson.toJson(ret));
 
         } catch (InvocationTargetException | IllegalAccessException e) {
+            e.printStackTrace();
             var errorField = String.format("Error on %s.%s()", jsonRequest.get("objectName").getAsString(),
                     jsonRequest.get("remoteMethod").getAsString());
             jsonReturn.addProperty("error", errorField);
@@ -141,7 +157,7 @@ public class App {
      * @objectName: It is the main class that contains the remote methods each
      * object can contain several remote methods
      */
-    public static void registerObject(Object remoteMethod, String objectName) {
+    private static void registerObject(Object remoteMethod, String objectName) {
         listOfObjects.put(objectName, remoteMethod);
     }
 }

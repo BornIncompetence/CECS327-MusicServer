@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.util.Base64;
 
 public class SongServices {
-    static final int FRAGMENT_SIZE = 8192;
+    private static final int FRAGMENT_SIZE = 8192;
 
     SongServices() {}
 
