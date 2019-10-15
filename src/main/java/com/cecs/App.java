@@ -118,16 +118,19 @@ public class App {
                         parameters[i] = Integer.parseInt(parameterStrs);
                         break;
                     case "long":
-                        parameters[i] = Long.parseLong(parameterStrs[i]);
+                        parameters[i] = Long.parseLong(parameterStrs);
                         break;
                     case "int":
-                        parameters[i] = Integer.parseInt(parameterStrs[i]);
+                        parameters[i] = Integer.parseInt(parameterStrs);
                         break;
                     case "java.lang.String":
                         parameters[i] = parameterStrs;
                         break;
+                    case "String":
+                        parameters[i] = parameterStrs;
+                        break;
                     case "com.cecs.model.User":
-                        parameters[i] = gson.fromJson(parameterStrs[i], User.class);
+                        parameters[i] = gson.fromJson(parameterStrs, User.class);
                         break;
                     }
                 }
