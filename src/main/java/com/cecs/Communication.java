@@ -85,25 +85,24 @@ class Communication {
             // Prepare the parameters
             var types = method.getParameterTypes();
             var parameters = new Object[types.length];
-            var parameterStrs = new String[types.length];
             {
                 var it = jsonRequest.get("param").getAsJsonObject().entrySet().iterator();
                 for (int i = 0; i < types.length; ++i) {
-                    parameterStrs[i] = it.next().getValue().getAsString();
+                    var parameterStr = it.next().getValue().getAsString();
                     switch (types[i].getCanonicalName()) {
                     case "java.lang.Long":
                     case "long":
-                        parameters[i] = Long.parseLong(parameterStrs[i]);
+                        parameters[i] = Long.parseLong(parameterStr);
                         break;
                     case "java.lang.Integer":
                     case "int":
-                        parameters[i] = Integer.parseInt(parameterStrs[i]);
+                        parameters[i] = Integer.parseInt(parameterStr);
                         break;
                     case "java.lang.String":
-                        parameters[i] = parameterStrs[i];
+                        parameters[i] = parameterStr;
                         break;
                     case "com.cecs.model.User":
-                        parameters[i] = gson.fromJson(parameterStrs[i], User.class);
+                        parameters[i] = gson.fromJson(parameterStr, User.class);
                         break;
                     }
                 }

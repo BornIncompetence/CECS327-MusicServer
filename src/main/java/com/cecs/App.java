@@ -4,7 +4,7 @@ import java.io.IOException;
 
 public class App {
     public static void main(String[] args) {
-        var comm = new Communication(5500, 16384);
+        var comm = new Communication(5500, 32768);
         try {
             comm.openConnection();
         } catch (IOException e) {

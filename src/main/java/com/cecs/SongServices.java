@@ -6,9 +6,10 @@ import java.io.IOException;
 import java.util.Base64;
 
 public class SongServices {
-    private static final int FRAGMENT_SIZE = 8192;
+    private static final int FRAGMENT_SIZE = 16384;
 
-    SongServices() {}
+    SongServices() {
+    }
 
     /*
      * getSongChunk: Gets a chunk of a given song
