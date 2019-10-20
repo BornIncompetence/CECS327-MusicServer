@@ -6,6 +6,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.NoSuchElementException;
 
 import com.cecs.model.User;
 import com.google.gson.Gson;
@@ -65,13 +66,13 @@ class Communication {
      *         error if one occurred
      */
     private String dispatch(String request) {
-        JsonObject jsonReturn = new JsonObject();
-        JsonParser parser = new JsonParser();
-        JsonObject jsonRequest = parser.parse(request).getAsJsonObject();
+        var jsonReturn = new JsonObject();
+        var parser = new JsonParser();
+        var jsonRequest = parser.parse(request).getAsJsonObject();
 
         try {
             // Obtains the object pointing to SongServices
-            Object object = listOfObjects.get(jsonRequest.get("objectName").getAsString());
+            var object = listOfObjects.get(jsonRequest.get("objectName").getAsString());
 
             // Obtains the method from the list of methods that exist for the class
             var optionalMethod = Arrays.stream(object.getClass().getMethods())
@@ -84,27 +85,28 @@ class Communication {
 
             // Prepare the parameters
             var types = method.getParameterTypes();
+            var arr = jsonRequest.get("param").getAsJsonArray();
+            if (types.length != arr.size()) {
+                throw new NoSuchElementException();
+            }
+
             var parameters = new Object[types.length];
-            {
-                var it = jsonRequest.get("param").getAsJsonObject().entrySet().iterator();
-                for (int i = 0; i < types.length; ++i) {
-                    var parameterStr = it.next().getValue().getAsString();
-                    switch (types[i].getCanonicalName()) {
-                    case "java.lang.Long":
-                    case "long":
-                        parameters[i] = Long.parseLong(parameterStr);
-                        break;
-                    case "java.lang.Integer":
-                    case "int":
-                        parameters[i] = Integer.parseInt(parameterStr);
-                        break;
-                    case "java.lang.String":
-                        parameters[i] = parameterStr;
-                        break;
-                    case "com.cecs.model.User":
-                        parameters[i] = gson.fromJson(parameterStr, User.class);
-                        break;
-                    }
+            for (int i = 0; i < types.length; ++i) {
+                switch (types[i].getCanonicalName()) {
+                case "java.lang.Long":
+                case "long":
+                    parameters[i] = arr.get(i).getAsLong();
+                    break;
+                case "java.lang.Integer":
+                case "int":
+                    parameters[i] = arr.get(i).getAsInt();
+                    break;
+                case "java.lang.String":
+                    parameters[i] = arr.get(i).getAsString();
+                    break;
+                case "com.cecs.model.User":
+                    parameters[i] = gson.fromJson(arr.get(i), User.class);
+                    break;
                 }
             }
 
@@ -114,6 +116,10 @@ class Communication {
         } catch (InvocationTargetException | IllegalAccessException e) {
             var errorField = String.format("Error on %s.%s()", jsonRequest.get("objectName").getAsString(),
                     jsonRequest.get("remoteMethod").getAsString());
+            jsonReturn.addProperty("error", errorField);
+        } catch (NoSuchElementException e) {
+            var errorField = String.format("Wrong number of parameters provided for %s.%s",
+                    jsonRequest.get("objectName").getAsString(), jsonRequest.get("remoteMethod").getAsString());
             jsonReturn.addProperty("error", errorField);
         }
 
