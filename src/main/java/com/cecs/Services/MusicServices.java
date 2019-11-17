@@ -1,14 +1,13 @@
 package com.cecs.Services;
 
 import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.cecs.App;
 import com.cecs.DFS.DFS;
+import com.cecs.DFS.RemoteInputFileStream;
 import com.cecs.Models.Music;
 import com.google.gson.GsonBuilder;
 
@@ -21,7 +20,7 @@ public class MusicServices {
         this.dfs = dfs;
     }
 
-    public Music[] loadSongs(String asdf) {
+    public Music[] loadSongs(String asdf) throws Exception {
         if (library == null) {
             loadLibrary();
         }
@@ -35,7 +34,7 @@ public class MusicServices {
         return queries.get(query).size();
     }
 
-    public Music[] loadChunk(int start, int end, String query) {
+    public Music[] loadChunk(int start, int end, String query) throws Exception {
         if (library == null) {
             loadLibrary();
         }
@@ -59,8 +58,11 @@ public class MusicServices {
 
     }
 
-    private void loadLibrary() {
-        var reader = new InputStreamReader(App.class.getResourceAsStream("/music.json"), StandardCharsets.UTF_8);
+    private void loadLibrary() throws Exception {
+
+        RemoteInputFileStream rifs = dfs.read("music.json", 1); //only reads the first page of the file, need to update to use for loop
+        
+        var reader = new InputStreamReader(rifs);
         var musics = new GsonBuilder().create().fromJson(reader, Music[].class);
         for (var music : musics) {
             music.getSong().setArtist(music.getArtist().getName());
