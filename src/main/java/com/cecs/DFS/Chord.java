@@ -1,4 +1,4 @@
-package com.cecs;
+package com.cecs.DFS;
 
 /**
 * Chord implements Chord P2P
@@ -503,5 +503,11 @@ public class Chord extends java.rmi.server.UnicastRemoteObject implements ChordM
         } catch (RemoteException e) {
             System.out.println("Cannot retrive id of successor or predecessor");
         }
+    }
+
+    @Override
+    public RemoteInputFileStream search(String songName) throws RemoteException {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

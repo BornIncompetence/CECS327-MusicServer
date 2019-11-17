@@ -1,4 +1,4 @@
-package com.cecs;
+package com.cecs.Services;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -6,9 +6,10 @@ import java.io.IOException;
 import java.util.Base64;
 
 public class SongServices {
-    private static final int FRAGMENT_SIZE = 8192;
+    private static final int FRAGMENT_SIZE = 16384;
 
-    SongServices() {}
+    public SongServices() {
+    }
 
     /*
      * getSongChunk: Gets a chunk of a given song

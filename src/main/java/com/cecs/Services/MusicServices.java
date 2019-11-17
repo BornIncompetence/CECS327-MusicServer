@@ -1,7 +1,4 @@
-package com.cecs;
-
-import com.cecs.model.Music;
-import com.google.gson.GsonBuilder;
+package com.cecs.Services;
 
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
@@ -10,28 +7,35 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class MusicServices {
-    private static Music[] library;
-    private static HashMap<String, List<Music>> queries = new HashMap<>();
+import com.cecs.App;
+import com.cecs.DFS.DFS;
+import com.cecs.Models.Music;
+import com.google.gson.GsonBuilder;
 
-    MusicServices() {
+public class MusicServices {
+    private Music[] library;
+    private HashMap<String, List<Music>> queries = new HashMap<>();
+    public DFS dfs;
+
+    public MusicServices(DFS dfs) {
+        this.dfs = dfs;
     }
 
-    public static Music[] loadSongs(String asdf) {
+    public Music[] loadSongs(String asdf) {
         if (library == null) {
             loadLibrary();
         }
         return library;
     }
 
-    public static int querySize(String query) {
+    public int querySize(String query) {
         if (query.isBlank()) {
             return library.length;
         }
         return queries.get(query).size();
     }
 
-    public static Music[] loadChunk(int start, int end, String query) {
+    public Music[] loadChunk(int start, int end, String query) {
         if (library == null) {
             loadLibrary();
         }
@@ -55,7 +59,7 @@ public class MusicServices {
 
     }
 
-    private static void loadLibrary() {
+    private void loadLibrary() {
         var reader = new InputStreamReader(App.class.getResourceAsStream("/music.json"), StandardCharsets.UTF_8);
         var musics = new GsonBuilder().create().fromJson(reader, Music[].class);
         for (var music : musics) {

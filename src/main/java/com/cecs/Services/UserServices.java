@@ -1,4 +1,6 @@
-package com.cecs;
+package com.cecs.Services;
+
+import static java.util.Arrays.binarySearch;
 
 import java.io.File;
 import java.io.FileReader;
@@ -7,16 +9,14 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
-import com.cecs.model.User;
+import com.cecs.Models.User;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-
-import static java.util.Arrays.binarySearch;
 
 public class UserServices {
     private static Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
-    UserServices() {
+    public UserServices() {
     }
 
     /**

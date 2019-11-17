@@ -1,4 +1,4 @@
-package com.cecs;
+package com.cecs.DFS;
 
 import java.util.*;
 import java.nio.file.*;

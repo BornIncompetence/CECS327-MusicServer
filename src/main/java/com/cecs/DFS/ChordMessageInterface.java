@@ -1,4 +1,4 @@
-package com.cecs;
+package com.cecs.DFS;
 
 import java.rmi.*;
 import java.io.*;
@@ -29,4 +29,6 @@ public interface ChordMessageInterface extends Remote {
     public byte[] get(long guidObject, long offset, int len) throws IOException, RemoteException;
 
     public void delete(long guidObject) throws IOException, RemoteException;
+
+    public RemoteInputFileStream search (String songName) throws RemoteException;
 }
