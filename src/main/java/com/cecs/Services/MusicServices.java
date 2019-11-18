@@ -11,6 +11,8 @@ import com.cecs.DFS.RemoteInputFileStream;
 import com.cecs.Models.Music;
 import com.google.gson.GsonBuilder;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 public class MusicServices {
     private Music[] library;
     private HashMap<String, List<Music>> queries = new HashMap<>();
@@ -59,14 +61,23 @@ public class MusicServices {
     }
 
     private void loadLibrary() throws Exception {
-
-        RemoteInputFileStream rifs = dfs.read("music.json", 1); //only reads the first page of the file, need to update to use for loop
-        
-        var reader = new InputStreamReader(rifs);
-        var musics = new GsonBuilder().create().fromJson(reader, Music[].class);
-        for (var music : musics) {
-            music.getSong().setArtist(music.getArtist().getName());
+        Music[] listOfSongs = new Music[0];
+        for(int i = 0; i < dfs.GetNumberOfPagesForFile("music.json"); i++){
+            RemoteInputFileStream rifs = dfs.read("music.json", i);
+            var reader = new InputStreamReader(rifs);
+            var musics = new GsonBuilder().create().fromJson(reader, Music[].class);
+            for (var music : musics) {
+                music.getSong().setArtist(music.getArtist().getName());
+            }
+            listOfSongs = concatenateArrays(listOfSongs, musics);
         }
-        library = musics;
+        library = listOfSongs;
+    }
+
+    private Music[] concatenateArrays(Music[] firstArray, Music[] secondArray){
+        int sizeOfNewArray = firstArray.length + secondArray.length;
+        Music[] newArray = new Music[sizeOfNewArray];
+        newArray = ArrayUtils.addAll(firstArray, secondArray);
+        return newArray;
     }
 }
